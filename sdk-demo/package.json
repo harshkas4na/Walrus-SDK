@@ -7,7 +7,8 @@
     "dev": "nodemon  src/index.ts",
     "start": "node dist/index.js",
     "build": "npx tsc",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test": "npx ts-node test/manual-test.ts"
   },
   "files": [
     "dist/**/*"
@@ -25,6 +26,7 @@
   },
   "dependencies": {
     "axios": "^1.7.9",
-    "crypto-js": "^4.2.0"
+    "crypto-js": "^4.2.0",
+    "formdata-node": "^6.0.3"
   }
 }
