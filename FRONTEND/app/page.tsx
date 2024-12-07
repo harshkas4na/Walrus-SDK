@@ -19,7 +19,7 @@ export default function Home() {
         <p className="text-[#4fd1c5]/60 text-xl mb-8">Secure, efficient, and decentralized AI dataset repository.</p>
         <div className="flex justify-center gap-4">
           <Button variant="retro" size="lg" asChild>
-            <Link href="/upload">Start_Journey</Link>
+            <Link href="/models">Start_Journey</Link>
           </Button>
           <Button variant="outline" size="lg" className="border-[#4fd1c5] text-[#4fd1c5] hover:bg-[#4fd1c5] hover:text-[#0a0b14]" asChild>
           <Link href="/upload">Dev Guide</Link>

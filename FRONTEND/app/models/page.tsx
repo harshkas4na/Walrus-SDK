@@ -12,7 +12,7 @@ const agents = [
     fileType: "CSV",
     datasetSize: "10,000 Datapoints",
     isFree: true,
-    blobID: "TA1-BLOB-001",
+    blobID: "cyqnkuBgKRVUlOtJnMpubf3p-Cqv3IlHh-pAdTDdfMM",
   },
   {
     name: "Trading Model 2",
@@ -23,7 +23,7 @@ const agents = [
     datasetSize: "25,000 Datapoints",
     isFree: false,
     price: 99,
-    blobID: "TA2-BLOB-002",
+    blobID: "tmeX1Fl9s2bP-kFdytLyjKi7Oc_i8xIS6QH6Z3_lMe0",
   },
   // Add more agents as needed
 ]

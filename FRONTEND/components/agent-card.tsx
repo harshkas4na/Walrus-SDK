@@ -7,8 +7,11 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Progress } from "@/components/ui/progress"
 import Image from "next/image"
 import { Loader2 } from 'lucide-react'
+import SDK from "sdk-demo-1111"
 
 interface AgentCardProps {
   name: string
@@ -36,6 +39,21 @@ export function AgentCard({
   const [isModalOpen, setModalOpen] = useState(false)
   const [isPurchased, setPurchased] = useState(false)
   const [isBuying, setIsBuying] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [status, setStatus] = useState({ type: "", message: "" })
+  const [password, setPassword] = useState("DataLinks")
+
+  const sdk = new SDK()
+
+  const updateStatus = (type: string, message: string) => {
+    setStatus({ type, message })
+  }
+
+  const resetStatus = () => {
+    setStatus({ type: "", message: "" })
+    setProgress(0)
+  }
 
   const handleBuy = () => {
     setModalOpen(true)
@@ -47,6 +65,51 @@ export function AgentCard({
   }
 
   const handleUse = () => setModalOpen(true)
+
+  const handleDownload = async () => {
+    if (!blobID) {
+      updateStatus("error", "Missing blob ID")
+      return
+    }
+
+    if (!isFree && !password) {
+      updateStatus("error", "Password required for paid datasets")
+      return
+    }
+
+    setIsProcessing(true)
+    resetStatus()
+
+    try {
+      updateStatus("info", "Downloading file...")
+      const blob = isFree
+        ? await sdk.readFile(blobID)
+        : await sdk.readFileWithDecryption(blobID, password)
+
+      
+      const url = URL.createObjectURL(blob)
+
+      const a = document.createElement("a")
+      a.style.display = "none"
+      a.href = url
+      a.download = "DATASET_FILE"
+      document.body.appendChild(a)
+      a.click()
+
+      setTimeout(() => {
+        URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+      }, 100)
+
+      setProgress(100)
+      updateStatus("success", "File downloaded successfully!")
+    } catch (error:any) {
+      console.error("Download failed:", error)
+      updateStatus("error", `Download failed: ${error.message}`)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
 
   return (
     <Card className="overflow-hidden bg-gray-900/50 transition-colors hover:bg-gray-900/70">
@@ -118,13 +181,28 @@ export function AgentCard({
                     <Label htmlFor="password" className="text-right">
                       Password
                     </Label>
-                    <Input id="password" value="DataLinks" className="col-span-3" readOnly />
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="col-span-3"
+                      placeholder="Enter password for paid dataset"
+                    />
                   </div>
                 )}
               </div>
-              <Button className="w-full" onClick={() => setModalOpen(false)}>
-                Download
+              <Button className="w-full" onClick={handleDownload} disabled={isProcessing}>
+                {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {isProcessing ? "Downloading..." : "Download"}
               </Button>
+              {status.message && (
+                <Alert variant={status.type === "error" ? "destructive" : "default"}>
+                  <AlertTitle>{status.type === "error" ? "Error" : "Success"}</AlertTitle>
+                  <AlertDescription>{status.message}</AlertDescription>
+                </Alert>
+              )}
+              {isProcessing && <Progress value={progress} className="w-full mt-4" />}
             </>
           ) : (
             <>

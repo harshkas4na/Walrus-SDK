@@ -8,7 +8,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import SDK from "sdk-demo-1111";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Progress } from "@/components/ui/progress"
+import SDK from "sdk-demo-1111"
 
 export default function CreateAgent() {
   const [formData, setFormData] = useState({
@@ -20,14 +22,12 @@ export default function CreateAgent() {
     price: "",
     blobID: "",
   })
-  const [file, setFile] = useState(null);
-  const [password, setPassword] = useState("");
-  const [status, setStatus] = useState({ type: "", message: "" });
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [blobId, setBlobId] = useState(""); // Add this to store the blobId
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [status, setStatus] = useState({ type: "", message: "" })
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [progress, setProgress] = useState(0)
 
-  const sdk = new SDK();
+  const sdk = new SDK()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -42,65 +42,71 @@ export default function CreateAgent() {
     setFormData(prev => ({ ...prev, isFree: checked }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    if (!file || !password) {
-      updateStatus("error", "Please select a file and enter a password");
-      return;
-    }
-
-    setIsProcessing(true);
-    resetStatus();
-
-    try {
-      // Generate encryption key
-      const result = await sdk.storeFile(file, 5);
-
-      console.log(result);
-
-      const uploadedBlobId = result.newlyCreated.blobObject.blobId;
-      setBlobId(uploadedBlobId); // Store the blobId
-
-      setProgress(100);
-      updateStatus(
-        "success",
-        `File uploaded successfully! Blob ID: ${uploadedBlobId}`
-      );
-    } catch (error) {
-      console.error("Upload failed:", error);
-      updateStatus("error", `Upload failed: ${error.message}`);
-    } finally {
-      setIsProcessing(false);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setSelectedFile(event.target.files[0])
     }
   }
-  const handleSubmitPAID = (e: React.FormEvent) => {
-    if (!file || !password) {
-      updateStatus("error", "Please select a file and enter a password");
-      return;
+
+  const updateStatus = (type: string, message: string) => {
+    setStatus({ type, message })
+  }
+
+  const resetStatus = () => {
+    setStatus({ type: "", message: "" })
+    setProgress(0)
+  }
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      updateStatus("error", "Please select a file to upload")
+      return
     }
 
-    setIsProcessing(true);
-    resetStatus();
+    setIsProcessing(true)
+    resetStatus()
 
     try {
-      // Generate encryption key
-      const result = await sdk.storeFileWithEncryption(file, 5, "MANI");
-
-      console.log(result);
-
-      const uploadedBlobId = result.newlyCreated.blobObject.blobId;
-      setBlobId(uploadedBlobId); // Store the blobId
-
-      setProgress(100);
-      updateStatus(
-        "success",
-        `File uploaded successfully! Blob ID: ${uploadedBlobId}`
-      );
-    } catch (error) {
-      console.error("Upload failed:", error);
-      updateStatus("error", `Upload failed: ${error.message}`);
+      const result = await sdk.storeFile(selectedFile, 5)
+      const uploadedBlobId = result.alreadyCertified.blobId || result.newlyCreated.blobId;
+      setFormData(prev => ({ ...prev, blobID: uploadedBlobId }))
+      setProgress(100)
+      updateStatus("success", `File uploaded successfully! Blob ID: ${uploadedBlobId}`)
+    } catch (error:any) {
+      console.error("Upload failed:", error)
+      updateStatus("error", `Upload failed: ${error.message}`)
     } finally {
-      setIsProcessing(false);
+      setIsProcessing(false)
     }
+  }
+
+  const handleUploadPAID = async () => {
+    if (!selectedFile) {
+      updateStatus("error", "Please select a file to upload")
+      return
+    }
+
+    setIsProcessing(true)
+    resetStatus()
+
+    try {
+      const result = await sdk.storeFileWithEncryption(selectedFile, 5, "MANI")
+      const uploadedBlobId = result.newlyCreated.blobObject.blobId
+      setFormData(prev => ({ ...prev, blobID: uploadedBlobId }))
+      setProgress(100)
+      updateStatus("success", `File uploaded successfully! Blob ID: ${uploadedBlobId}`)
+    } catch (error:any) {
+      console.error("Upload failed:", error)
+      updateStatus("error", `Upload failed: ${error.message}`)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log(formData)
+    // Here you would typically send the data to your backend
   }
 
   return (
@@ -113,6 +119,7 @@ export default function CreateAgent() {
           <Input 
             id="name" 
             name="name" 
+            className="text-gray-800"
             value={formData.name} 
             onChange={handleInputChange} 
             placeholder="Enter agent name"
@@ -123,14 +130,15 @@ export default function CreateAgent() {
           <Label htmlFor="description">Description</Label>
           <Textarea 
             id="description" 
-            name="description" 
+            name="description"
+            className="text-gray-800" 
             value={formData.description} 
             onChange={handleInputChange} 
             placeholder="Describe the agent's functionality"
             required 
           />
         </div>
-        <div>
+        <div className="text-gray-800">
           <Label htmlFor="fileType">File Type</Label>
           <Select name="fileType" onValueChange={(value) => handleSelectChange("fileType", value)}>
             <SelectTrigger>
@@ -147,7 +155,8 @@ export default function CreateAgent() {
           <Label htmlFor="datasetSize">Dataset Size</Label>
           <Input 
             id="datasetSize" 
-            name="datasetSize" 
+            name="datasetSize"
+            className="text-gray-800" 
             value={formData.datasetSize} 
             onChange={handleInputChange} 
             placeholder="e.g., 10,000 Datapoints"
@@ -169,6 +178,7 @@ export default function CreateAgent() {
               id="price" 
               name="price" 
               type="number" 
+              className="text-gray-800"
               value={formData.price} 
               onChange={handleInputChange} 
               placeholder="Enter price"
@@ -177,14 +187,40 @@ export default function CreateAgent() {
           </div>
         )}
         <div>
+          <Label htmlFor="file-upload" className="block text-[#4fd1c5] mb-2">Select a file to upload</Label>
+          <Input 
+            id="file-upload" 
+            type="file" 
+            onChange={handleFileChange} 
+            className="bg-[#1a1b2e] border-[#4fd1c5]/30 text-white focus:border-[#4fd1c5] transition-colors duration-300"
+          />
+        </div>
+        <div className="flex justify-between space-x-4">
+          <Button
+            type="button"
+            onClick={formData.isFree ? handleUpload : handleUploadPAID}
+            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            disabled={isProcessing}
+          >
+            {isProcessing ? "Uploading..." : formData.isFree ? "Upload Free Dataset" : "Upload Paid Dataset"}
+          </Button>
+        </div>
+        {status.message && (
+          <Alert variant={status.type === "error" ? "destructive" : "default"}>
+            <AlertTitle>{status.type === "error" ? "Error" : "Success"}</AlertTitle>
+            <AlertDescription>{status.message}</AlertDescription>
+          </Alert>
+        )}
+        {isProcessing && <Progress value={progress} className="w-full" />}
+        <div>
           <Label htmlFor="blobID">Blob ID</Label>
           <Input 
             id="blobID" 
             name="blobID" 
             value={formData.blobID} 
             onChange={handleInputChange} 
-            placeholder="Enter Blob ID"
-            required 
+            placeholder="Blob ID will appear here after upload"
+            disabled
           />
         </div>
         <div className="flex justify-between pt-4">
