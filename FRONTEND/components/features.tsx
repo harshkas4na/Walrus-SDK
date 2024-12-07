@@ -12,7 +12,7 @@ const features = [
     id: 2,
     icon: '💰',
     title: 'Data Monetization',
-    description: 'Earn rewards through our token-based system for sharing valuable datasets.',
+    description: 'Earn rewards through our native token-based system for sharing valuable datasets.',
     color: 'bg-[#b794f4]',
   },
   {
