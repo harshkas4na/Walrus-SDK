@@ -40,20 +40,24 @@ export default function UploadDataset() {
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setStatus("Please select a file to upload")
-      return
+      setStatus("Please select a file to upload");
+      return;
     }
-
+  
     try {
-      setStatus("Uploading...")
-      const result = await storage.storeFile(selectedFile, 5)
-      setUploadedBlobId(result.blobId)
-      setStatus("Upload complete! Blob ID: " + result.blobId)
+      setStatus("Uploading...");
+      const result = await storage.storeFile(selectedFile, 5);
+      const blobId = result.alreadyCertified.blobId || result.newlyCreated.blobId;
+  
+      console.log("result", blobId); // Ensure it logs the correct Blob ID
+      setUploadedBlobId(blobId);
+      setStatus("Upload complete! Blob ID: " + blobId); // Use the resolved `blobId`
     } catch (err) {
-      setStatus(`Error: ${err.message}`)
-      console.error(err)
+      setStatus(`Error: ${err.message}`);
+      console.error(err);
     }
-  }
+  };
+  
 
   const handleDownload = async () => {
     if (!downloadBlobId.trim()) {
@@ -147,6 +151,7 @@ export default function UploadDataset() {
     return extensions[mimeType] || ""
   }
 
+  console.log("uploadedBlobId", uploadedBlobId)
   return (
     <div className="container mx-auto px-4 py-12">
       <h1 className="text-5xl md:text-7xl text-center mb-12 text-[#4fd1c5]">Upload Dataset</h1>
@@ -184,7 +189,7 @@ export default function UploadDataset() {
               <div className="border-2 border-dashed border-[#4fd1c5]/40 rounded-xl p-8 text-center">
                 <div className="text-6xl mb-4">📁</div>
                 <p className="text-[#4fd1c5] mb-4">Drag and drop your files here, or click to select files</p>
-                <Input id="file-upload" type="file" className="hidden" onChange={handleFileChange} />
+                <Input id="file-upload" type="file"  onChange={handleFileChange} />
                 <Label htmlFor="file-upload" className="cursor-pointer">
                   <Button variant="outline" className="border-[#4fd1c5] text-[#4fd1c5] hover:bg-[#4fd1c5] hover:text-[#0a0b14]">
                     Select Files
@@ -209,7 +214,7 @@ export default function UploadDataset() {
                   <p className="text-white/60">Description: {datasetDescription}</p>
                   <p className="text-white/60">Files: {selectedFile ? `1 file (${selectedFile.size} bytes)` : 'No file selected'}</p>
                   {uploadedBlobId && (
-                    <p className="text-white/60">Uploaded Blob ID: {uploadedBlobId}</p>
+                    <p className="text-white/60">Uploaded Blob ID: {`${uploadedBlobId}`}</p>
                   )}
                 </CardContent>
               </Card>
