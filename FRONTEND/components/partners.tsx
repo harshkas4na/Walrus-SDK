@@ -1,8 +1,8 @@
 export function Partners() {
   const partners = [
-    { name: 'SuiChain', logo: '/placeholder.svg?height=50&width=150', description: 'Blockchain platform for smart contract integration' },
-    { name: 'AI Research Lab', logo: '/placeholder.svg?height=50&width=150', description: 'Leading AI research institution leveraging our datasets' },
-    { name: 'DataVerse', logo: '/placeholder.svg?height=50&width=150', description: 'Data visualization tools for AI researchers' },
+    { name: 'SuiChain', logo: 'https://cryptologos.cc/logos/sui-sui-logo.svg?v=040', description: 'Blockchain platform for smart contract integration' },
+    { name: 'AI Research Lab', logo: 'https://cryptologos.cc/logos/numeraire-nmr-logo.png?v=040', description: 'Leading AI research institution leveraging our datasets' },
+    { name: 'DataVerse', logo: 'https://cryptologos.cc/logos/streamr-data-logo.png?v=040', description: 'Data visualization tools for AI researchers' },
   ]
 
   return (

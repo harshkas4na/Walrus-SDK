@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button"
 import { LanguageSelector } from '@/components/language-selector'
 import { Features } from '@/components/features'
 import { Partners } from '@/components/partners'
-import { Testimonials } from '@/components/testimonials'
 import { LiveStats } from '@/components/live-stats'
 import { Footer } from '@/components/footer'
 
@@ -13,17 +12,17 @@ export default function Home() {
       {/* Hero Section */}
       <section className="text-center mb-32 pt-12">
         <h1 className="text-7xl md:text-9xl mb-4 leading-none tracking-tight">
-          <span className="text-[#4fd1c5]">ROBUST</span> LIKE
+          <span className="text-[#4fd1c5]">Datalink.Ai</span> 
           <br />
-          <span className="text-white">WALRUS</span>
+          <span className="text-white">Marketplace</span>
         </h1>
         <p className="text-[#4fd1c5]/60 text-xl mb-8">Secure, efficient, and decentralized AI dataset repository.</p>
         <div className="flex justify-center gap-4">
           <Button variant="retro" size="lg" asChild>
-            <Link href="/upload">Start Uploading</Link>
+            <Link href="/upload">Start_Journey</Link>
           </Button>
-          <Button variant="outline" size="lg" className="border-[#4fd1c5] text-[#4fd1c5] hover:bg-[#4fd1c5] hover:text-[#0a0b14]">
-            Learn More
+          <Button variant="outline" size="lg" className="border-[#4fd1c5] text-[#4fd1c5] hover:bg-[#4fd1c5] hover:text-[#0a0b14]" asChild>
+          <Link href="/upload">Dev Guide</Link>
           </Button>
         </div>
       </section>
@@ -54,9 +53,6 @@ export default function Home() {
 
       {/* Partners Section */}
       <Partners />
-
-      {/* Testimonials Section */}
-      <Testimonials />
 
       {/* CTA Section */}
       <section className="text-center mb-32">

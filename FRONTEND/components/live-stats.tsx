@@ -5,18 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export function LiveStats() {
   const [stats, setStats] = useState({
-    dataStored: 0,
-    activeUsers: 0,
-    availableDatasets: 0,
+    dataSizeInGb: 124,
+    activeUsers: 250,
+    availableDatasets: 142,
   })
 
   useEffect(() => {
     // Simulating live data updates
     const interval = setInterval(() => {
       setStats(prevStats => ({
-        dataStored: prevStats.dataStored + Math.floor(Math.random() * 10),
-        activeUsers: prevStats.activeUsers + Math.floor(Math.random() * 5),
-        availableDatasets: prevStats.availableDatasets + Math.floor(Math.random() * 2),
+        dataSizeInGb: prevStats.dataSizeInGb + Math.floor(Math.random() * 100),
+        activeUsers: prevStats.activeUsers + Math.floor(Math.random() * 50),
+        availableDatasets: prevStats.availableDatasets + Math.floor(Math.random() * 20),
       }))
     }, 5000)
 

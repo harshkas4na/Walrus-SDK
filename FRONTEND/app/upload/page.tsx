@@ -4,33 +4,23 @@ import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Progress } from "@/components/ui/progress"
-import { Card, CardContent } from "@/components/ui/card"
+import { Copy } from 'lucide-react'
+import { LanguageSelector } from '@/components/language-selector'
+import { Footer } from '@/components/footer'
+import { useToast } from "@/components/ui/use-toast"
+import { Toaster } from "@/components/ui/toaster"
+
 const StorageSDK = require("sdk-demo-1111");
 
-
-export default function UploadDataset() {
-  const [step, setStep] = useState(1)
-  const [progress, setProgress] = useState(0)
-  const [status, setStatus] = useState("")
-  const [uploadedBlobId, setUploadedBlobId] = useState("")
-  const [downloadBlobId, setDownloadBlobId] = useState("")
-  const [datasetName, setDatasetName] = useState("")
-  const [datasetDescription, setDatasetDescription] = useState("")
+export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [status, setStatus] = useState('')
+  const [uploadedBlobId, setUploadedBlobId] = useState('')
+  const [downloadBlobId, setDownloadBlobId] = useState('')
+  const { toast } = useToast()
 
   const storage = new StorageSDK();
-
-  const nextStep = () => {
-    setStep(step + 1)
-    setProgress((step / 3) * 100)
-  }
-
-  const prevStep = () => {
-    setStep(step - 1)
-    setProgress(((step - 2) / 3) * 100)
-  }
+  let isFirstAttempt = true
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -49,15 +39,33 @@ export default function UploadDataset() {
       const result = await storage.storeFile(selectedFile, 5);
       const blobId = result.alreadyCertified.blobId || result.newlyCreated.blobId;
   
-      console.log("result", blobId); // Ensure it logs the correct Blob ID
+      console.log("result", blobId);
       setUploadedBlobId(blobId);
-      setStatus("Upload complete! Blob ID: " + blobId); // Use the resolved `blobId`
-    } catch (err:any) {
-      setStatus(`Error: ${err.message}`);
-      console.error(err);
+      setStatus("Upload complete! Blob ID: " + blobId);
+      isFirstAttempt = true; // Reset for next upload
+      toast({
+        title: "Upload Successful",
+        description: `File uploaded successfully. Blob ID: ${blobId}`,
+      })
+    } catch (err: any) {
+      if (isFirstAttempt) {
+        toast({
+          title: "Upload didn't complete",
+          description: "Please try uploading once more. It should work on the second attempt.",
+          variant: "default",
+        })
+        isFirstAttempt = false;
+      } else {
+        setStatus(`Error: ${err.message}`);
+        console.error(err);
+        toast({
+          title: "Upload Error",
+          description: `An error occurred: ${err.message}`,
+          variant: "destructive",
+        })
+      }
     }
   };
-  
 
   const handleDownload = async () => {
     if (!downloadBlobId.trim()) {
@@ -77,9 +85,18 @@ export default function UploadDataset() {
 
       await downloadStreamAsFile(data.body, `file-${downloadBlobId}`)
       setStatus("Download complete!")
-    } catch (error:any) {
+      toast({
+        title: "Download Successful",
+        description: "Your file has been downloaded successfully.",
+      })
+    } catch (error: any) {
       setStatus(`Error: ${error.message}`)
       console.error("Download error:", error)
+      toast({
+        title: "Download Error",
+        description: `An error occurred: ${error.message}`,
+        variant: "destructive",
+      })
     }
   }
 
@@ -151,113 +168,235 @@ export default function UploadDataset() {
     return extensions[mimeType] || ""
   }
 
-  console.log("uploadedBlobId", uploadedBlobId)
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    setStatus('Copied to clipboard!')
+    setTimeout(() => setStatus(''), 2000)
+    toast({
+      title: "Copied to Clipboard",
+      description: "The text has been copied to your clipboard.",
+    })
+  }
+
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-5xl md:text-7xl text-center mb-12 text-[#4fd1c5]">Upload Dataset</h1>
-      <div className="max-w-2xl mx-auto bg-[#0a0b14]/50 backdrop-blur-sm border border-[#4fd1c5]/20 rounded-xl p-8">
-        <Progress value={progress} className="mb-8" />
+    <div className="container mx-auto px-4 py-16 max-w-4xl">
+      {/* Installation Guide Section */}
+      <section className="mb-20">
+        <h2 className="text-4xl sm:text-5xl text-center mb-12 text-[#4fd1c5] font-bold tracking-tight">Installation Guide</h2>
         <div className="space-y-8">
-          {step === 1 && (
-            <div className="space-y-4">
-              <h2 className="text-3xl text-[#4fd1c5] mb-4">Dataset Information</h2>
-              <div>
-                <Label htmlFor="dataset-name" className="text-[#4fd1c5]">Dataset Name</Label>
-                <Input 
-                  id="dataset-name" 
-                  placeholder="Enter dataset name" 
-                  className="bg-[#0a0b14] border-[#4fd1c5]/20 text-white" 
-                  value={datasetName}
-                  onChange={(e) => setDatasetName(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="dataset-description" className="text-[#4fd1c5]">Description</Label>
-                <Textarea
-                  id="dataset-description"
-                  placeholder="Describe your dataset"
-                  className="bg-[#0a0b14] border-[#4fd1c5]/20 text-white"
-                  value={datasetDescription}
-                  onChange={(e) => setDatasetDescription(e.target.value)}
-                />
-              </div>
-            </div>
-          )}
-          {step === 2 && (
-            <div className="space-y-4">
-              <h2 className="text-3xl text-[#4fd1c5] mb-4">Upload Files</h2>
-              <div className="border-2 border-dashed border-[#4fd1c5]/40 rounded-xl p-8 text-center">
-                <div className="text-6xl mb-4">📁</div>
-                <p className="text-[#4fd1c5] mb-4">Drag and drop your files here, or click to select files</p>
-                <Input id="file-upload" type="file"  onChange={handleFileChange} />
-                <Label htmlFor="file-upload" className="cursor-pointer">
-                  <Button variant="outline" className="border-[#4fd1c5] text-[#4fd1c5] hover:bg-[#4fd1c5] hover:text-[#0a0b14]">
-                    Select Files
-                  </Button>
-                </Label>
-              </div>
-              {selectedFile && (
-                <p className="text-[#4fd1c5]">Selected file: {selectedFile.name}</p>
-              )}
-              <Button onClick={handleUpload} className="w-full bg-[#4fd1c5] text-[#0a0b14] hover:bg-[#4fd1c5]/80">
-                Upload File
+          <div className="bg-[#0a0b14]/70 backdrop-blur-lg border border-[#4fd1c5]/30 rounded-xl p-6 shadow-lg transition-all duration-300 hover:shadow-[#4fd1c5]/20 hover:border-[#4fd1c5]/50">
+            <h3 className="text-2xl text-[#4fd1c5] mb-4 font-semibold">Step 1: Installing the SDK</h3>
+            <div className="bg-[#1a1b2e] p-4 rounded-lg flex justify-between items-center">
+              <code className="text-white text-sm sm:text-base">npm i sdk-demo-1111</code>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => copyToClipboard('npm i sdk-demo-1111')} 
+                className="ml-2 bg-transparent border-[#4fd1c5] text-[#4fd1c5] hover:bg-[#4fd1c5] hover:text-[#0a0b14] transition-colors duration-300"
+              >
+                <Copy className="h-4 w-4" />
               </Button>
             </div>
-          )}
-          {step === 3 && (
-            <div className="space-y-4">
-              <h2 className="text-3xl text-[#4fd1c5] mb-4">Review and Submit</h2>
-              <Card className="bg-[#0a0b14] border border-[#4fd1c5]/20 rounded-lg p-4 mb-4">
-                <CardContent>
-                  <h3 className="text-xl text-[#4fd1c5] mb-2">Dataset Summary</h3>
-                  <p className="text-white/60">Name: {datasetName}</p>
-                  <p className="text-white/60">Description: {datasetDescription}</p>
-                  <p className="text-white/60">Files: {selectedFile ? `1 file (${selectedFile.size} bytes)` : 'No file selected'}</p>
-                  {uploadedBlobId && (
-                    <p className="text-white/60">Uploaded Blob ID: {`${uploadedBlobId}`}</p>
-                  )}
-                </CardContent>
-              </Card>
-              <Button className="w-full bg-[#4fd1c5] text-[#0a0b14] hover:bg-[#4fd1c5]/80" onClick={() => setStatus("Dataset submitted successfully!")}>
-                Submit Dataset
-              </Button>
-            </div>
-          )}
-        </div>
-        <div className="flex justify-between mt-8">
-          {step > 1 && (
-            <Button onClick={prevStep} variant="outline" className="border-[#4fd1c5] text-[#4fd1c5] hover:bg-[#4fd1c5] hover:text-[#0a0b14]">
-              Previous
-            </Button>
-          )}
-          {step < 3 && (
-            <Button onClick={nextStep} className="ml-auto bg-[#4fd1c5] text-[#0a0b14] hover:bg-[#4fd1c5]/80">
-              Next
-            </Button>
-          )}
-        </div>
-        {status && (
-          <div className="mt-4 p-4 bg-[#0a0b14] border border-[#4fd1c5]/20 rounded-lg text-[#4fd1c5]">
-            {status}
           </div>
-        )}
-      </div>
-      <div className="max-w-2xl mx-auto mt-8 bg-[#0a0b14]/50 backdrop-blur-sm border border-[#4fd1c5]/20 rounded-xl p-8">
-        <h2 className="text-3xl text-[#4fd1c5] mb-4">Download File</h2>
-        <div className="flex gap-4">
-          <Input
-            type="text"
-            value={downloadBlobId}
-            onChange={(e) => setDownloadBlobId(e.target.value)}
-            placeholder="Enter Blob ID"
-            className="bg-[#0a0b14] border-[#4fd1c5]/20 text-white flex-grow"
-          />
-          <Button onClick={handleDownload} className="bg-[#4fd1c5] text-[#0a0b14] hover:bg-[#4fd1c5]/80">
-            Download
-          </Button>
+
+          <div className="bg-[#0a0b14]/70 backdrop-blur-lg border border-[#4fd1c5]/30 rounded-xl p-6 shadow-lg transition-all duration-300 hover:shadow-[#4fd1c5]/20 hover:border-[#4fd1c5]/50">
+            <h3 className="text-2xl text-[#4fd1c5] mb-4 font-semibold">Step 2: Import in the project</h3>
+            <div className="bg-[#1a1b2e] p-4 rounded-lg flex justify-between items-center">
+              <code className="text-white text-sm sm:text-base">const StorageSDK = require("sdk-demo-1111");</code>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => copyToClipboard('const StorageSDK = require("sdk-demo-1111");')} 
+                className="ml-2 bg-transparent border-[#4fd1c5] text-[#4fd1c5] hover:bg-[#4fd1c5] hover:text-[#0a0b14] transition-colors duration-300"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="bg-[#0a0b14]/70 backdrop-blur-lg border border-[#4fd1c5]/30 rounded-xl p-6 shadow-lg transition-all duration-300 hover:shadow-[#4fd1c5]/20 hover:border-[#4fd1c5]/50">
+            <h3 className="text-2xl text-[#4fd1c5] mb-4 font-semibold">Uploading data example</h3>
+            <div className="bg-[#1a1b2e] p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center">
+              <pre className="text-white overflow-x-auto max-w-full sm:max-w-[calc(100%-3rem)] text-xs sm:text-sm mb-4 sm:mb-0">
+                <code className="language-javascript">
+                  {`const handleUpload = async () => {
+  if (!selectedFile) {
+    setStatus("Please select a file to upload");
+    return;
+  }
+
+  try {
+    setStatus("Uploading...");
+    const result = await storage.storeFile(selectedFile, 5);
+    const blobId = result.alreadyCertified.blobId || result.newlyCreated.blobId;
+
+    console.log("result", blobId);
+    setUploadedBlobId(blobId);
+    setStatus("Upload complete! Blob ID: " + blobId);
+  } catch (err) {
+    setStatus(\`Error: \${err.message}\`);
+    console.error(err);
+  }
+};`.split('\n').map((line, i) => (
+                    <span key={i} className="block">
+                      <span className="text-gray-500">{i + 1}</span>
+                      <span className="text-yellow-500">{line.match(/^(const|let|var|if|try|catch)/) ? ' ' + line.match(/^(const|let|var|if|try|catch)/)[0] : ''}</span>
+                      <span className="text-blue-400">{line.match(/\b(async|await|return)\b/) ? ' ' + line.match(/\b(async|await|return)\b/)[0] : ''}</span>
+                      <span className="text-green-400">{line.match(/(".*?"|'.*?')/) ? ' ' + line.match(/(".*?"|'.*?')/)[0] : ''}</span>
+                      <span className="text-purple-400">{line.match(/\b(setStatus|console|storage)\b/) ? ' ' + line.match(/\b(setStatus|console|storage)\b/)[0] : ''}</span>
+                      <span className="text-white">{line.replace(/^(const|let|var|if|try|catch)/, '').replace(/\b(async|await|return)\b/, '').replace(/(".*?"|'.*?')/, '').replace(/\b(setStatus|console|storage)\b/, '')}</span>
+                    </span>
+                  ))}
+                </code>
+              </pre>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => copyToClipboard(`const handleUpload = async () => {
+  if (!selectedFile) {
+    setStatus("Please select a file to upload");
+    return;
+  }
+
+  try {
+    setStatus("Uploading...");
+    const result = await storage.storeFile(selectedFile, 5);
+    const blobId = result.alreadyCertified.blobId || result.newlyCreated.blobId;
+
+    console.log("result", blobId);
+    setUploadedBlobId(blobId);
+    setStatus("Upload complete! Blob ID: " + blobId);
+  } catch (err) {
+    setStatus(\`Error: \${err.message}\`);
+    console.error(err);
+  }
+};`)} 
+                className="sm:ml-2 bg-transparent border-[#4fd1c5] text-[#4fd1c5] hover:bg-[#4fd1c5] hover:text-[#0a0b14] transition-colors duration-300"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="bg-[#0a0b14]/70 backdrop-blur-lg border border-[#4fd1c5]/30 rounded-xl p-6 shadow-lg transition-all duration-300 hover:shadow-[#4fd1c5]/20 hover:border-[#4fd1c5]/50">
+            <h3 className="text-2xl text-[#4fd1c5] mb-4 font-semibold">Downloading data with blobId</h3>
+            <div className="bg-[#1a1b2e] p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center">
+              <pre className="text-white overflow-x-auto max-w-full sm:max-w-[calc(100%-3rem)] text-xs sm:text-sm mb-4 sm:mb-0">
+                <code className="language-javascript">
+                  {`const handleDownload = async () => {
+  if (!downloadBlobId.trim()) {
+    setStatus("Please enter a Blob ID to download")
+    return
+  }
+
+  try {
+    setStatus("Downloading...")
+    const data = await fetch(
+      \`https://aggregator.walrus-testnet.walrus.space/v1/\${downloadBlobId}\`
+    )
+
+    if (!data.body) {
+      throw new Error("No body found in the response")
+    }
+
+    await downloadStreamAsFile(data.body, \`file-\${downloadBlobId}\`)
+    setStatus("Download complete!")
+  } catch (error) {
+    setStatus(\`Error: \${error.message}\`)
+    console.error("Download error:", error)
+  }
+}`.split('\n').map((line, i) => (
+                    <span key={i} className="block">
+                      <span className="text-gray-500">{i + 1}</span>
+                      <span className="text-yellow-500">{line.match(/^(const|let|var|if|try|catch)/) ? ' ' + line.match(/^(const|let|var|if|try|catch)/)[0] : ''}</span>
+                      <span className="text-blue-400">{line.match(/\b(async|await|return)\b/) ? ' ' + line.match(/\b(async|await|return)\b/)[0] : ''}</span>
+                      <span className="text-green-400">{line.match(/(".*?"|'.*?'|`.*?`)/) ? ' ' + line.match(/(".*?"|'.*?'|`.*?`)/)[0] : ''}</span>
+                      <span className="text-purple-400">{line.match(/\b(setStatus|console|fetch)\b/) ? ' ' + line.match(/\b(setStatus|console|fetch)\b/)[0] : ''}</span>
+                      <span className="text-white">{line.replace(/^(const|let|var|if|try|catch)/, '').replace(/\b(async|await|return)\b/, '').replace(/(".*?"|'.*?'|`.*?`)/, '').replace(/\b(setStatus|console|fetch)\b/, '')}</span>
+                    </span>
+                  ))}
+                </code>
+              </pre>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => copyToClipboard(`const handleDownload = async () => {
+  if (!downloadBlobId.trim()) {
+    setStatus("Please enter a Blob ID to download")
+    return
+  }
+
+  try {
+    setStatus("Downloading...")
+    const data = await fetch(
+      \`https://aggregator.walrus-testnet.walrus.space/v1/\${downloadBlobId}\`
+    )
+
+    if (!data.body) {
+      throw new Error("No body found in the response")
+    }
+
+    await downloadStreamAsFile(data.body, \`file-\${downloadBlobId}\`)
+    setStatus("Download complete!")
+  } catch (error) {
+    setStatus(\`Error: \${error.message}\`)
+    console.error("Download error:", error)
+  }
+}`)} 
+                className="sm:ml-2 bg-transparent border-[#4fd1c5] text-[#4fd1c5] hover:bg-[#4fd1c5] hover:text-[#0a0b14] transition-colors duration-300"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* Upload and Download Example Section */}
+      <section className="mb-20">
+        <h2 className="text-4xl sm:text-5xl text-center mb-12 text-[#4fd1c5] font-bold tracking-tight">SDK Demo</h2>
+        <div className="bg-[#0a0b14]/70 backdrop-blur-lg border border-[#4fd1c5]/30 rounded-xl p-6 shadow-lg transition-all duration-300 hover:shadow-[#4fd1c5]/20 hover:border-[#4fd1c5]/50">
+          <div className="mb-8">
+            <h3 className="text-2xl text-[#4fd1c5] mb-4 font-semibold">Upload</h3>
+            <div className="mb-4">
+              <Label htmlFor="file-upload" className="block text-[#4fd1c5] mb-2">Select a file to upload</Label>
+              <Input 
+                id="file-upload" 
+                type="file" 
+                onChange={handleFileChange} 
+                className="bg-[#1a1b2e] border-[#4fd1c5]/30 text-white focus:border-[#4fd1c5] transition-colors duration-300"
+              />
+            </div>
+            <Button onClick={handleUpload} className="w-full bg-[#4fd1c5] text-[#0a0b14] hover:bg-[#4fd1c5]/80 transition-colors duration-300">
+              Upload File
+            </Button>
+          </div>
+          <div>
+            <h3 className="text-2xl text-[#4fd1c5] mb-4 font-semibold">Download</h3>
+            <div className="flex gap-4">
+              <Input
+                type="text"
+                value={downloadBlobId}
+                onChange={(e) => setDownloadBlobId(e.target.value)}
+                placeholder="Enter Blob ID"
+                className="bg-[#1a1b2e] border-[#4fd1c5]/30 text-white focus:border-[#4fd1c5] transition-colors duration-300 flex-grow"
+              />
+              <Button onClick={handleDownload} className="bg-[#4fd1c5] text-[#0a0b14] hover:bg-[#4fd1c5]/80 transition-colors duration-300">
+                Download
+              </Button>
+            </div>
+          </div>
+          {status && (
+            <div className="mt-4 p-4 bg-[#1a1b2e] border border-[#4fd1c5]/30 rounded-lg text-[#4fd1c5]">
+              {status}
+            </div>
+          )}
+        </div>
+      </section>
+      <LanguageSelector />
+      <Toaster />
     </div>
   )
 }
+
 
