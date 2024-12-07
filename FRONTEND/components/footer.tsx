@@ -5,8 +5,8 @@ export function Footer() {
     <footer className="border-t border-[#4fd1c5]/20 pt-8">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
-          <h3 className="text-xl text-[#4fd1c5] mb-4">Walrus</h3>
-          <p className="text-white/60">The premier decentralized AI dataset repository.</p>
+          <h3 className="text-xl text-[#4fd1c5] mb-4">Datalink.AI</h3>
+          <p className="text-white/60">Secure, efficient, and decentralized AI dataset repository.</p>
         </div>
         <div>
           <h4 className="text-lg text-[#4fd1c5] mb-4">Quick Links</h4>
