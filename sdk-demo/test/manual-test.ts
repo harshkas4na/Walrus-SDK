@@ -3,6 +3,8 @@ const StorageSDK = require("../src/index");
 
 const main = async () => {
   const sdk = new StorageSDK();
+  const file = new File(["Hello, Walrus!"], "test.txt", { type: "text/plain" });
+  const password = "strong-password";
 
   console.log("Initialized SDK:", sdk);
 
@@ -10,7 +12,6 @@ const main = async () => {
 
   // Upload Testing
   try {
-    const file = new File(["Hello, Walrus!"], "test.txt", { type: "text/plain" });
     const uploadResponse = await sdk.storeFile(file, 5);
     console.log("Upload response:", uploadResponse);
 
@@ -42,6 +43,25 @@ const main = async () => {
     console.log("Downloaded file content:", downloadedFileContent);
   } catch (error) {
     console.error("Error during file download:", error);
+  }
+
+  try {
+    // Encrypt and Store File
+    const uploadResponse = await sdk.encryptAndStoreFile(file, password);
+    console.log("Encrypted Upload Response:", uploadResponse);
+
+    // Extract blobId from response
+    const blobId = uploadResponse?.alreadyCertified?.blobId;
+
+    // Read and Decrypt File
+    if (blobId) {
+      const decryptedContent = await sdk.readAndDecryptFile(blobId, password);
+      console.log("Decrypted File Content:", decryptedContent);
+    } else {
+      console.error("No blobId found in upload response.");
+    }
+  } catch (error: any) {
+    console.error("Error:", error.message);
   }
 };
 
