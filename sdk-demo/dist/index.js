@@ -36,6 +36,17 @@ class StorageSDK {
             }
         });
     }
+    storeFileWithEncryption(file_1) {
+        return __awaiter(this, arguments, void 0, function* (file, epochs = 5, password) {
+            try {
+                const response = yield uploadFile_1.default.uploadWithEncryption(this.publisherUrl, file, epochs, password);
+                return response;
+            }
+            catch (error) {
+                throw new Error(`Upload error: ${error.message}`);
+            }
+        });
+    }
     readFile(blobId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -44,6 +55,17 @@ class StorageSDK {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 return response.body;
+            }
+            catch (error) {
+                throw new Error(`Read error: ${error.message}`);
+            }
+        });
+    }
+    readFileWithDecryption(blobId, password) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const blob = yield getFile_1.default.getFileWithDecryption(this.aggregatorUrl, blobId, password);
+                return blob;
             }
             catch (error) {
                 throw new Error(`Read error: ${error.message}`);

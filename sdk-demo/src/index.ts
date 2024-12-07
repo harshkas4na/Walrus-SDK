@@ -30,6 +30,24 @@ class StorageSDK {
     }
   }
 
+  async storeFileWithEncryption(
+    file: File,
+    epochs: number = 5,
+    password: string
+  ): Promise<any> {
+    try {
+      const response = await upload.uploadWithEncryption(
+        this.publisherUrl,
+        file,
+        epochs,
+        password
+      );
+      return response;
+    } catch (error: any) {
+      throw new Error(`Upload error: ${error.message}`);
+    }
+  }
+
   async readFile(blobId: string): Promise<ReadableStream<Uint8Array>> {
     try {
       const response = await get.getFile(this.aggregatorUrl, blobId);
@@ -39,6 +57,22 @@ class StorageSDK {
       }
 
       return response.body!;
+    } catch (error: any) {
+      throw new Error(`Read error: ${error.message}`);
+    }
+  }
+
+  async readFileWithDecryption(
+    blobId: string,
+    password: string
+  ): Promise<Blob> {
+    try {
+      const blob = await get.getFileWithDecryption(
+        this.aggregatorUrl,
+        blobId,
+        password
+      );
+      return blob;
     } catch (error: any) {
       throw new Error(`Read error: ${error.message}`);
     }
