@@ -52,7 +52,7 @@ export default function UploadDataset() {
       console.log("result", blobId); // Ensure it logs the correct Blob ID
       setUploadedBlobId(blobId);
       setStatus("Upload complete! Blob ID: " + blobId); // Use the resolved `blobId`
-    } catch (err) {
+    } catch (err:any) {
       setStatus(`Error: ${err.message}`);
       console.error(err);
     }
@@ -77,7 +77,7 @@ export default function UploadDataset() {
 
       await downloadStreamAsFile(data.body, `file-${downloadBlobId}`)
       setStatus("Download complete!")
-    } catch (error) {
+    } catch (error:any) {
       setStatus(`Error: ${error.message}`)
       console.error("Download error:", error)
     }
