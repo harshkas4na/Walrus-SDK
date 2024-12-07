@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Walrus SDK Demo App
+
+This page serves as a gateway to Walrus' decentralized storage capabilities. It also highlights the power of the **Walrus-SDK**, enabling developers to seamlessly integrate Walrus into their applications with ease. Start building with Walrus and **Walrus-SDK** today to unlock the future of secure, efficient, and decentralized data storage!
 
 ## Getting Started
 
-First, run the development server:
+Install the dependencies run the development server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Learn More
+## What You Can Do on This Page
 
-To learn more about Next.js, take a look at the following resources:
+The **Home Page** serves as the central hub for exploring and interacting with the Walrus platform. It is designed to upload and download datasets using the **Walrus-SDK**, providing a user-friendly and intuitive interface for managing decentralized storage.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Key Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Upload Datasets**: Quickly and securely upload AI datasets to the Walrus decentralized network using the "Start Uploading" button.
+   - **Upload**: Add datasets to the network.
+   - **Retrieve**: Access your datasets anytime with high-speed retrieval.
+2. **Learn About the Platform**: Access detailed information about Walrus features, its decentralized storage model, and how it enhances data security and availability.
+3. **Live Statistics**: View real-time platform statistics to understand its scale and performance.
+4. **Partners and Testimonials**: Learn about partnerships and hear what users say about Walrus.
