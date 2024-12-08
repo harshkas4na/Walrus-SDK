@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
-const SDK = require("sdk-demo-1111");
+const SDK = require("walrus-sdk");
 
 export default function CreateAgent() {
   const [formData, setFormData] = useState({

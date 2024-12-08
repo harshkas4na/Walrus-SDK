@@ -15,7 +15,7 @@ import { StatusDisplay } from '@/components/status-display'
 import { CodeExample } from '@/components/code-example'
 import { InstallationStep } from '@/components/installation-step'
 
-const StorageSDK = require("sdk-demo-1111");
+const StorageSDK = require("walrus-sdk");
 
 export default function StorageSDKDemo() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -236,13 +236,13 @@ export default function StorageSDKDemo() {
         <div className="space-y-8">
           <InstallationStep
             title="Step 1: Installing the SDK"
-            code="npm i sdk-demo-1111"
-            onCopy={() => copyToClipboard('npm i sdk-demo-1111')}
+            code="npm i walrus-sdk"
+            onCopy={() => copyToClipboard('npm i walrus-sdk')}
           />
           <InstallationStep
             title="Step 2: Import in the project"
-            code="const StorageSDK = require('sdk-demo-1111');"
-            onCopy={() => copyToClipboard('const StorageSDK = require("sdk-demo-1111");')}
+            code="const StorageSDK = require('walrus-sdk');"
+            onCopy={() => copyToClipboard('const StorageSDK = require("walrus-sdk");')}
           />
           <CodeExample
             title="Uploading data without encryption example"
