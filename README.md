@@ -29,7 +29,7 @@ Directly interacting with decentralized storage APIs can be cumbersome and error
 
 ## Project Structure
 
-The `sdk` folder contains the source code for the Walrus-SDK, which is also available as an npm package [here](https://www.npmjs.com/package/sdk-demo-1111). To get started with Walrus-SDK, refer to the [README.md in the `sdk` folder](https://github.com/harshkas4na/Walrus-SDK/tree/main/sdk).
+The `sdk` folder contains the source code for the Walrus-SDK, which is also available as an npm package [here](https://www.npmjs.com/package/walrus-sdk). To get started with Walrus-SDK, refer to the [README.md in the `sdk` folder](https://github.com/harshkas4na/Walrus-SDK/tree/main/sdk).
 
 The `demo` folder includes a demo application that demonstrates how to use the SDK for uploading and downloading files to the Walrus network. For instructions on running the demo application, check the [README.md in the `demo` folder](https://github.com/harshkas4na/Walrus-SDK/tree/main/demo).
 
