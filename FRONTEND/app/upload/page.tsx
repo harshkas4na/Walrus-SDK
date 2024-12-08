@@ -38,7 +38,9 @@ export default function StorageSDKDemo() {
     setFilePassword(event.target.value)
   }
 
+ 
   const handleUpload = async () => {
+    console.log("trigered");
     if (!selectedFile) {
       setStatus("Please select a file to upload")
       return
@@ -46,8 +48,9 @@ export default function StorageSDKDemo() {
 
     try {
       setStatus("Uploading...")
+      
       const result = await storage.storeFile(selectedFile, 5)
-      const blobId = result.alreadyCertified.blobId || result.newlyCreated.blobId
+      const blobId = result.newlyCreated.blobObject.blobId
 
       console.log("result", blobId)
       setUploadedBlobId(blobId)
@@ -84,34 +87,70 @@ export default function StorageSDKDemo() {
   }
 
   const handleDownload = async () => {
+
     if (!downloadBlobId.trim()) {
       setStatus("Please enter a Blob ID to download")
       return
     }
 
+
     try {
       setStatus("Downloading...")
-      const blob = await storage.readFile(uploadedBlobId)
-      
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.style.display = "none"
-      a.href = url
-      a.download = `file-${downloadBlobId}`
-      document.body.appendChild(a)
-      a.click()
+      const blob = await storage.readFile(downloadBlobId)
 
-      setTimeout(() => {
-        URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-      }, 100)
+      // await downloadStreamAsFile(blob, "download")
+      
+      console.log("blob", blob);
+
+      await downloadStreamAsFile(blob,"download")
+   
 
       setStatus("Download complete!")
     } catch (error: any) {
       setStatus(`Error: ${error.message}`)
       console.error("Download error:", error)
     }
+  };
+
+  async function downloadStreamAsFile(stream:any, suggestedFileName = "download") {
+    try {
+      const reader = stream.getReader();
+      const firstChunk = await reader.read();
+      reader.releaseLock();
+      const fileType = detectFileType(firstChunk.value);
+      const newStream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(firstChunk.value);
+        },
+        async pull(controller) {
+          const reader = stream.getReader();
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            controller.enqueue(value);
+          }
+          controller.close();
+          reader.releaseLock();
+        },
+      });
+      const response = new Response(newStream);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${suggestedFileName}${getFileExtension(fileType)}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Download failed:", error);
+      throw error;
+    }
   }
+
+ 
+  
 
   const handleDownloadWithEncryption = async () => {
     if (!downloadBlobId.trim()) {
@@ -155,6 +194,39 @@ export default function StorageSDKDemo() {
       description: "The text has been copied to your clipboard.",
     })
   }
+
+  function detectFileType(bytes:any) {
+    const arr = new Uint8Array(bytes);
+    if (arr[0] === 0xff && arr[1] === 0xd8 && arr[2] === 0xff) {
+      return "image/jpeg";
+    }
+    if (
+      arr[0] === 0x89 &&
+      arr[1] === 0x50 &&
+      arr[2] === 0x4e &&
+      arr[3] === 0x47
+    ) {
+      return "image/png";
+    }
+    if (
+      arr[0] === 0x25 &&
+      arr[1] === 0x50 &&
+      arr[2] === 0x44 &&
+      arr[3] === 0x46
+    ) {
+      return "application/pdf";
+    }
+    return "application/octet-stream";
+  }
+  function getFileExtension(mimeType: 'image/jpeg' | 'image/png' | 'application/pdf' | 'application/octet-stream'): string {
+    const extensions: { [key: string]: string } = {
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "application/pdf": ".pdf",
+        "application/octet-stream": "",
+    };
+    return extensions[mimeType] || "";
+}
 
   return (
     <div className="container mx-auto px-4 py-16 max-w-4xl">

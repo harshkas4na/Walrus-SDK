@@ -11,7 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import Image from "next/image"
 import { Loader2 } from 'lucide-react'
-import SDK from "sdk-demo-1111"
+const SDK = require("sdk-demo-1111");
 
 interface AgentCardProps {
   name: string
